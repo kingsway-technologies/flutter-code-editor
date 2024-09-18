@@ -165,6 +165,8 @@ class CodeField extends StatefulWidget {
 
   final GutterStyle gutterStyle;
 
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
+
   const CodeField({
     super.key,
     required this.controller,
@@ -184,15 +186,14 @@ class CodeField extends StatefulWidget {
     this.lineNumberBuilder,
     this.focusNode,
     this.onChanged,
+    this.contextMenuBuilder,
     @Deprecated('Use gutterStyle instead') this.lineNumbers,
-    @Deprecated('Use gutterStyle instead')
-    this.lineNumberStyle = const GutterStyle(),
+    @Deprecated('Use gutterStyle instead') this.lineNumberStyle = const GutterStyle(),
   })  : assert(
             gutterStyle == null || lineNumbers == null,
             'Can not provide gutterStyle and lineNumbers at the same time. '
             'Please use gutterStyle and provide necessary columns to show/hide'),
-        gutterStyle = gutterStyle ??
-            ((lineNumbers == false) ? GutterStyle.none : lineNumberStyle);
+        gutterStyle = gutterStyle ?? ((lineNumbers == false) ? GutterStyle.none : lineNumberStyle);
 
   @override
   State<CodeField> createState() => _CodeFieldState();
@@ -381,9 +382,7 @@ class _CodeFieldState extends State<CodeField> {
 
     final themeData = Theme.of(context);
     final styles = CodeTheme.of(context)?.styles;
-    _backgroundCol = widget.background ??
-        styles?[rootKey]?.backgroundColor ??
-        DefaultStyles.backgroundColor;
+    _backgroundCol = widget.background ?? styles?[rootKey]?.backgroundColor ?? DefaultStyles.backgroundColor;
 
     if (widget.decoration != null) {
       _backgroundCol = null;
@@ -398,6 +397,7 @@ class _CodeFieldState extends State<CodeField> {
 
     final codeField = TextField(
       focusNode: _focusNode,
+      contextMenuBuilder: widget.contextMenuBuilder,
       scrollPadding: widget.padding,
       style: textStyle,
       controller: widget.controller,
@@ -453,11 +453,9 @@ class _CodeFieldState extends State<CodeField> {
 
   Widget _buildGutter() {
     final lineNumberSize = textStyle.fontSize;
-    final lineNumberColor =
-        widget.gutterStyle.textStyle?.color ?? textStyle.color?.withOpacity(.5);
+    final lineNumberColor = widget.gutterStyle.textStyle?.color ?? textStyle.color?.withOpacity(.5);
 
-    final lineNumberTextStyle =
-        (widget.gutterStyle.textStyle ?? textStyle).copyWith(
+    final lineNumberTextStyle = (widget.gutterStyle.textStyle ?? textStyle).copyWith(
       color: lineNumberColor,
       fontFamily: textStyle.fontFamily,
       fontSize: lineNumberSize,
@@ -486,8 +484,7 @@ class _CodeFieldState extends State<CodeField> {
 
     final leftOffset = _getPopupLeftOffset(textPainter);
     final normalTopOffset = _getPopupTopOffset(textPainter, caretHeight);
-    final flippedTopOffset = normalTopOffset -
-        (Sizes.autocompletePopupMaxHeight + caretHeight + Sizes.caretPadding);
+    final flippedTopOffset = normalTopOffset - (Sizes.autocompletePopupMaxHeight + caretHeight + Sizes.caretPadding);
 
     setState(() {
       _normalPopupOffset = Offset(leftOffset, normalTopOffset);
@@ -519,10 +516,7 @@ class _CodeFieldState extends State<CodeField> {
 
   double _getPopupLeftOffset(TextPainter textPainter) {
     return max(
-      _getCaretOffset(textPainter).dx +
-          widget.padding.left -
-          _horizontalCodeScroll!.offset +
-          (_editorOffset?.dx ?? 0),
+      _getCaretOffset(textPainter).dx + widget.padding.left - _horizontalCodeScroll!.offset + (_editorOffset?.dx ?? 0),
       0,
     );
   }
@@ -540,8 +534,7 @@ class _CodeFieldState extends State<CodeField> {
   }
 
   void _onPopupStateChanged() {
-    final shouldShow =
-        widget.controller.popupController.shouldShow && windowSize != null;
+    final shouldShow = widget.controller.popupController.shouldShow && windowSize != null;
     if (!shouldShow) {
       _suggestionsPopup?.remove();
       _suggestionsPopup = null;

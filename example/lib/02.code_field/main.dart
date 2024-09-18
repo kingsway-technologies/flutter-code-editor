@@ -32,10 +32,17 @@ class CodeEditor extends StatelessWidget {
           child: SingleChildScrollView(
             child: CodeField(
               controller: controller,
+              contextMenuBuilder: _defaultContextMenuBuilder,
             ),
           ),
         ),
       ),
+    );
+  }
+
+  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+    return AdaptiveTextSelectionToolbar.editableText(
+      editableTextState: editableTextState,
     );
   }
 }
